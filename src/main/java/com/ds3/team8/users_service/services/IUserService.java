@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface IUserService {
     List<User> findAll(); // Obtener todos los usuarios
+
+    User save(User user); // Crear un usuario
 }

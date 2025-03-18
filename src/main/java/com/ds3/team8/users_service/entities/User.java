@@ -14,29 +14,35 @@ import lombok.NoArgsConstructor;
 @Entity  // Indica que esta clase es una entidad JPA
 @Table(name = "users")  // Nombre de la tabla en la base de datos
 public class User {
+    // Clave primaria
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // Autoincremental
     private Long id;
 
+    // Campos
     @Column(name = "first_name", nullable = false)
-    private String firstName;
+    private String firstName; // Nombre del usuario
 
     @Column(name = "last_name", nullable = false)
-    private String lastName;
+    private String lastName; // Apellido del usuario
 
     @Column(nullable = false, unique = true)
-    private String email;
+    private String email; // Correo del usuario
 
     @Column(nullable = false)
-    private String password;
+    private String password; // Contraseña del usuario
 
     @Column(nullable = false)
-    private String phone;
+    private String phone; // Número de telefono del usuario
 
     @Column(nullable = false)
-    private String address;
+    private String address; // Dirección del usuario
 
-    @OneToOne
-    @JoinColumn(name = "role_id", nullable = false, unique = true) // Relación 1 a 1 con la tabla roles
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
+    // Relaciones
+    @ManyToOne
+    @JoinColumn(name = "role_id", nullable = false) // Relación 1 a muchos con la tabla roles
     private Role role;
 }

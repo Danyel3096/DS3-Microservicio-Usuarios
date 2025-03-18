@@ -18,9 +18,20 @@ public class UserServiceImpl implements IUserService {
         this.userRepository = userRepository;
     }
 
+    // Obtener todos los usuarios
     @Override
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        return userRepository.findAll(); // Obtener todos los usuarios
+        return userRepository.findAll();
+    }
+
+    // Crear un usuario
+    @Override
+    @Transactional
+    public User save(User user) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RuntimeException("El correo ya existe");
+        }
+        return userRepository.save(user);
     }
 }
