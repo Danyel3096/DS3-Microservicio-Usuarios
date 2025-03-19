@@ -6,44 +6,46 @@ import com.ds3.team8.users_service.repositories.IRoleRepository;
 import com.ds3.team8.users_service.repositories.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.UUID;
 
 @Service
-public class UserServiceImpl implements IUserService {
+public class AuthServiceImpl implements IAuthService {
 
     private IUserRepository userRepository;
 
     private IRoleRepository roleRepository;
 
     @Autowired
-    public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository){
+    public AuthServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
     }
 
-    // Obtener todos los usuarios
-    @Override
-    @Transactional(readOnly = true)
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
 
-    // Crear un usuario
     @Override
-    @Transactional
-    public User save(User user) {
+    public User register(User user) {
         // Verificar si el correo existe
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("El correo ya está registrado.");
         }
 
-        // Obtener el rol y verificar si existe
-        Role role = roleRepository.findById(user.getRole().getId())
-                .orElseThrow(() -> new RuntimeException("El rol especificado no existe"));
+        // Asignar el rol por defecto
+        Role defaultRole = roleRepository.findByName("Cliente")
+                .orElseThrow(() -> new RuntimeException("Rol Cliente no encontrado."));
 
-        user.setRole(role);
+        user.setRole(defaultRole);
+
         return userRepository.save(user);
+    }
+
+    @Override
+    public String login(String email, String password) {
+        // Verificar si el correo existe
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Credenciales incorrectas."));
+
+        // Generar y devolver el token JWT
+        return UUID.randomUUID().toString();
     }
 }

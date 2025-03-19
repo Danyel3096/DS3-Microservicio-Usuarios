@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Data  // Genera automáticamente getters, setters, equals, hashCode y toString
 @NoArgsConstructor  // Constructor sin argumentos
 @AllArgsConstructor // Constructor con todos los argumentos
-@Builder  // Permite construir objetos usando el patrón Builder
 @Entity  // Indica que esta clase es una entidad JPA
 @Table(name = "users")  // Nombre de la tabla en la base de datos
 public class User {

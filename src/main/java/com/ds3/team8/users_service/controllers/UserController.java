@@ -36,6 +36,7 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    // Crear un usuario
     @PostMapping("/")
     public ResponseEntity<?> saveUser(@RequestBody User user) {
         Map<String, Object> response = new HashMap<>();
