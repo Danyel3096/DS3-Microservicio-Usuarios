@@ -26,7 +26,6 @@ public class UserController {
 
     // Obtener todos los usuarios
     @GetMapping("/")
-    @PreAuthorize("hasRole('Administrador')")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.findAll();
 

@@ -37,6 +37,7 @@ public class SecurityConfig {
         return http.csrf(customizer -> customizer.disable()).
                 authorizeHttpRequests(request -> request
                         .requestMatchers("/api/v1/auth/**").permitAll() // Permitir acceso a la autenticación
+                        .requestMatchers("/api/v1/users/**").permitAll() // Permitir acceso a usuarios
                         .anyRequest().authenticated()).
                 httpBasic(Customizer.withDefaults()).
                 sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
