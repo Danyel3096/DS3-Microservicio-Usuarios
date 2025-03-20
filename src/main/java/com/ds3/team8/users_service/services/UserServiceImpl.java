@@ -1,5 +1,6 @@
 package com.ds3.team8.users_service.services;
 
+import com.ds3.team8.users_service.dtos.UserRequest;
 import com.ds3.team8.users_service.entities.Role;
 import com.ds3.team8.users_service.entities.User;
 import com.ds3.team8.users_service.repositories.IRoleRepository;
@@ -7,21 +8,17 @@ import com.ds3.team8.users_service.repositories.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
 
-    private IUserRepository userRepository;
+    private final IUserRepository userRepository;
 
-    private IRoleRepository roleRepository;
-
-    @Autowired
-    public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository){
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-    }
+    private final IRoleRepository roleRepository;
 
     // Obtener todos los usuarios
     @Override
@@ -41,9 +38,29 @@ public class UserServiceImpl implements IUserService {
 
         // Obtener el rol y verificar si existe
         Role role = roleRepository.findById(user.getRole().getId())
-                .orElseThrow(() -> new RuntimeException("El rol especificado no existe"));
+                .orElseThrow(() -> new RuntimeException("El rol especificado no existe"));    
 
         user.setRole(role);
+        return userRepository.save(user);
+    }
+
+    // Actualizar/Modificar un usuario
+    @Override
+    @Transactional
+    public User update(Long id, UserRequest userRequest) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // Actualizar los campos si los valores no son nulos
+        if (userRequest.getFirstName() != null) user.setFirstName(userRequest.getFirstName());
+        if (userRequest.getLastName() != null) user.setLastName(userRequest.getLastName());   
+        if (userRequest.getEmail() != null) user.setEmail(userRequest.getEmail());
+        if (userRequest.getPassword() != null) user.setPassword(userRequest.getPassword());   
+        if (userRequest.getPhone() != null) user.setPhone(userRequest.getPhone());
+        if (userRequest.getAddress() != null) user.setAddress(userRequest.getAddress());      
+        if (userRequest.getIsActive() != null) user.setIsActive(userRequest.getIsActive());   
+        if (userRequest.getRole() != null) user.setRole(userRequest.getRole());
+
         return userRepository.save(user);
     }
 }
