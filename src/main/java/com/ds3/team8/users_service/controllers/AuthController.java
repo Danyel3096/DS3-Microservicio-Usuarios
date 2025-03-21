@@ -3,6 +3,7 @@ package com.ds3.team8.users_service.controllers;
 import com.ds3.team8.users_service.dtos.AuthRequest;
 import com.ds3.team8.users_service.entities.User;
 import com.ds3.team8.users_service.services.IAuthService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -3,15 +3,16 @@ package com.ds3.team8.users_service.controllers;
 import com.ds3.team8.users_service.dtos.UserRequest;
 import com.ds3.team8.users_service.entities.User;
 import com.ds3.team8.users_service.services.IUserService;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +63,11 @@ public class UserController {
     }
 
     //Buscar usuarios con paginación
-    @GetMapping("/pageable") // Cambia la URL a algo como /api/v1/users/pageable?page=0&size=10&sort=name,asc
+    // Cambia la URL a algo como /api/v1/users/pageable?page=0&size=10&sort=firstName,asc
+    //Para el sort= se puede usar cualquier atributo de la entidad User
+    //Por ejemplo para ordenar por apellido desde la Z a la A sería sort=lastName,desc
+    //Para el caso de roles se puede usar sort=role.name,asc (sort=entity.attribute,asc o desc)
+    @GetMapping("/pageable")
     public Page<User> findAllPageable(Pageable pageable) {
         return userService.findAllPageable(pageable);
     }
