@@ -60,4 +60,10 @@ public class UserController {
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    //Buscar usuarios con paginación
+    @GetMapping("/pageable") // Cambia la URL a algo como /api/v1/users/pageable?page=0&size=10&sort=name,asc
+    public Page<User> findAllPageable(Pageable pageable) {
+        return userService.findAllPageable(pageable);
+    }
 }

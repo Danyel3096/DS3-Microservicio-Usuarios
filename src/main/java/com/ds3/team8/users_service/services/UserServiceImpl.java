@@ -71,4 +71,11 @@ public class UserServiceImpl implements IUserService {
 
         return userRepository.save(user);
     }
+
+    // Buscar usuarios con paginación
+    @Override
+    @Transactional(readOnly = true)
+    public Page<User> findAllPageable(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
 }
