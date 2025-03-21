@@ -10,6 +10,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,18 +51,13 @@ public class UserController {
 
     //Actualizar/Modificar un usuario
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserRequest userRequest) {
-        User updatedUser = userService.update(id, userRequest);
-        return ResponseEntity.ok(updatedUser);
-    }
-    /* @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {      
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserRequest userRequest) {      
         Map<String, Object> response = new HashMap<>();
 
-        User updatedUser = userService.update(id, user);
+        User updatedUser = userService.update(id, userRequest);
         response.put("message", "El usuario ha sido actualizado con éxito!");
         response.put("user", updatedUser);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
-    } */
+    }
 }

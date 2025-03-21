@@ -11,24 +11,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor // Crea un constructor con los atributos final e inyecta dependencias sin @Autowired.
 public class UserServiceImpl implements IUserService {
-
+    //Importante los "final" de aquí para que funcione el RequiredArgsConstructor
     private final IUserRepository userRepository;
 
-    private IRoleRepository roleRepository;
+    private final IRoleRepository roleRepository;
 
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, PasswordEncoder passwordEncoder){
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final PasswordEncoder passwordEncoder;
 
     // Obtener todos los usuarios
     @Override
