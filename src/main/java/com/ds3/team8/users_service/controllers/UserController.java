@@ -1,16 +1,16 @@
 package com.ds3.team8.users_service.controllers;
 
 import com.ds3.team8.users_service.dtos.UserRequest;
+import com.ds3.team8.users_service.dtos.UserResponse;
 import com.ds3.team8.users_service.entities.User;
 import com.ds3.team8.users_service.services.IUserService;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor // Crea un constructor con los atributos final e inyecta dependencias sin @Autowired.
 public class UserController {
 
+    
     private final IUserService userService; //Importante "final" para que funcione el RequiredArgsConstructor
 
     // Obtener todos los usuarios
@@ -70,5 +71,12 @@ public class UserController {
     @GetMapping("/pageable")
     public Page<User> findAllPageable(Pageable pageable) {
         return userService.findAllPageable(pageable);
+    }
+
+
+    // Obtener un Usuario por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.findById(id));
     }
 }

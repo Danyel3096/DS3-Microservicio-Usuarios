@@ -1,11 +1,14 @@
 package com.ds3.team8.users_service.services;
 
 import com.ds3.team8.users_service.dtos.UserRequest;
+import com.ds3.team8.users_service.dtos.UserResponse;
 import com.ds3.team8.users_service.entities.Role;
 import com.ds3.team8.users_service.entities.User;
+import com.ds3.team8.users_service.exceptions.UserNotFoundException;
 import com.ds3.team8.users_service.repositories.IRoleRepository;
 import com.ds3.team8.users_service.repositories.IUserRepository;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,4 +82,28 @@ public class UserServiceImpl implements IUserService {
     public Page<User> findAllPageable(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
+
+    @Override
+    public UserResponse findById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        return convertToResponse(user);
+    }
+
+    private UserResponse convertToResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getAddress(),
+                user.getIsActive(),
+                user.getRole().getId()
+        );
+    }
 }
+
+
+
