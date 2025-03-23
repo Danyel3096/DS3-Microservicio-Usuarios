@@ -22,4 +22,6 @@ public interface IUserService {
 
     UserResponse findById(Long id);
 
+    void delete(Long id);
+
 }

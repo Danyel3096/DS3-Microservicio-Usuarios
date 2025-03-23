@@ -23,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor // Crea un constructor con los atributos final e inyecta dependencias sin @Autowired.
 public class UserController {
 
-    
+
     private final IUserService userService; //Importante "final" para que funcione el RequiredArgsConstructor
 
     // Obtener todos los usuarios
@@ -79,4 +79,13 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id));
     }
+
+    // Eliminación lógica de un usuario
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

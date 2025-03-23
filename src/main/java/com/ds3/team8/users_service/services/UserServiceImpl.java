@@ -91,6 +91,19 @@ public class UserServiceImpl implements IUserService {
         return convertToResponse(user);
     }
 
+    @Override
+    public void delete(Long id){
+        // Buscar el usuario en la base de datos
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        // Cambiar el estado a inactivo
+        existingUser.setIsActive(false);
+
+        // Guardar los cambios en la base de datos
+        userRepository.save(existingUser);
+    }
+
     private UserResponse convertToResponse(User user) {
         return new UserResponse(
                 user.getId(),
