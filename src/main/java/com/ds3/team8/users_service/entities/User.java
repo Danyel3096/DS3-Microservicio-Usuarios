@@ -12,12 +12,10 @@ import lombok.NoArgsConstructor;
 @Entity  // Indica que esta clase es una entidad JPA
 @Table(name = "users")  // Nombre de la tabla en la base de datos
 public class User {
-    // Clave primaria
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // Autoincremental
     private Long id;
 
-    // Campos
     @Column(name = "first_name", nullable = false)
     private String firstName; // Nombre del usuario
 
@@ -39,7 +37,6 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
-    // Relaciones
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false) // Relación 1 a muchos con la tabla roles
     private Role role;

@@ -1,21 +1,17 @@
 package com.ds3.team8.users_service.services;
 
 import com.ds3.team8.users_service.dtos.UserRequest;
-import com.ds3.team8.users_service.entities.User;
-
-import java.util.List;
-
+import com.ds3.team8.users_service.dtos.UserResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 @Service
 public interface IUserService {
-    List<User> findAll(); // Obtener todos los usuarios
-
-    User save(User user); // Crear un usuario
-
-    User update(Long id, UserRequest user); // Actualizar/Modificar un usuario
-
-    Page<User> findAllPageable(Pageable pageable); // Obtener todos los usuarios
+    List<UserResponse> findAll(); // Obtener todos los usuarios
+    UserResponse save(UserRequest userRequest); // Crear un usuario
+    UserResponse update(Long id, UserRequest userRequest); // Actualizar/Modificar un usuario
+    Page<UserResponse> findAllPageable(Pageable pageable); // Obtener todos los usuarios
 }

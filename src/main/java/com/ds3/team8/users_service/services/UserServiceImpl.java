@@ -1,82 +1,96 @@
 package com.ds3.team8.users_service.services;
 
 import com.ds3.team8.users_service.dtos.UserRequest;
+import com.ds3.team8.users_service.dtos.UserResponse;
 import com.ds3.team8.users_service.entities.Role;
 import com.ds3.team8.users_service.entities.User;
+import com.ds3.team8.users_service.exceptions.RoleNotFoundException;
+import com.ds3.team8.users_service.exceptions.UserAlreadyExistsException;
 import com.ds3.team8.users_service.repositories.IRoleRepository;
 import com.ds3.team8.users_service.repositories.IUserRepository;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor // Crea un constructor con los atributos final e inyecta dependencias sin @Autowired.
 public class UserServiceImpl implements IUserService {
-    //Importante los "final" de aquí para que funcione el RequiredArgsConstructor
-    private final IUserRepository userRepository;
+    private IUserRepository userRepository;
 
-    private final IRoleRepository roleRepository;
+    private IRoleRepository roleRepository;
 
-    private final PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, PasswordEncoder passwordEncoder){
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     // Obtener todos los usuarios
     @Override
-    @Transactional(readOnly = true)
-    public List<User> findAll() {
-        return userRepository.findAll();
+    public List<UserResponse> findAll() {
+        // Obtener todos los usuarios
+        return userRepository.findAll()
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
     }
 
     // Crear un usuario
     @Override
-    @Transactional
-    public User save(User user) {
-        // Verificar si el correo existe
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new RuntimeException("El correo ya está registrado.");
+    public UserResponse save(UserRequest userRequest) {
+        // Validar si ya existe el correo
+        Optional<User> userWithSameEmail = userRepository.findByEmail(userRequest.getEmail());
+        if (userWithSameEmail.isPresent() && userWithSameEmail.get().getIsActive()) {
+            throw new UserAlreadyExistsException(userRequest.getEmail());
         }
 
-        // Obtener el rol y verificar si existe
-        Role role = roleRepository.findById(user.getRole().getId())
-                .orElseThrow(() -> new RuntimeException("El rol especificado no existe"));    
+        // Validar que el rol exista y esté activo
+        Role role = roleRepository.findById(userRequest.getRoleId())
+                .filter(Role::getIsActive)
+                .orElseThrow(() -> new RoleNotFoundException(userRequest.getRoleId()));
 
+        User user = new User();
+        user.setFirstName(userRequest.getFirstName());
+        user.setLastName(userRequest.getLastName());
+        user.setEmail(userRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        user.setPhone(userRequest.getPhone());
+        user.setAddress(userRequest.getAddress());
+        user.setIsActive(true); // Asegurar que el usuario esté activo por defecto
         user.setRole(role);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        return userRepository.save(user);
+        // Guardar y devolver DTO
+        User savedUser = userRepository.save(user);
+        return convertToResponse(savedUser);
     }
 
     // Actualizar/Modificar un usuario
     @Override
-    @Transactional
-    public User update(Long id, UserRequest userRequest) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        // Actualizar los campos si los valores no son nulos
-        if (userRequest.getFirstName() != null) user.setFirstName(userRequest.getFirstName());
-        if (userRequest.getLastName() != null) user.setLastName(userRequest.getLastName());   
-        if (userRequest.getEmail() != null) user.setEmail(userRequest.getEmail());
-        if (userRequest.getPassword() != null) user.setPassword(userRequest.getPassword());   
-        if (userRequest.getPhone() != null) user.setPhone(userRequest.getPhone());
-        if (userRequest.getAddress() != null) user.setAddress(userRequest.getAddress());      
-        if (userRequest.getIsActive() != null) user.setIsActive(userRequest.getIsActive());   
-        if (userRequest.getRole() != null) user.setRole(userRequest.getRole());
-
-        return userRepository.save(user);
+    public UserResponse update(Long id, UserRequest userRequest) {
+        return null;
     }
 
     // Buscar usuarios con paginación
     @Override
-    @Transactional(readOnly = true)
-    public Page<User> findAllPageable(Pageable pageable) {
-        return userRepository.findAll(pageable);
+    public Page<UserResponse> findAllPageable(Pageable pageable) {
+        return null;
+    }
+
+    private UserResponse convertToResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getAddress(),
+                user.getIsActive(),
+                user.getRole().getId()
+        );
     }
 }

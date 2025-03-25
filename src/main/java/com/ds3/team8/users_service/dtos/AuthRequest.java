@@ -1,5 +1,6 @@
 package com.ds3.team8.users_service.dtos;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthRequest {
-    private String email; // Correo del usuario
-    private String password; // Contraseña del usuario
+    @NotBlank(message = "El correo es obligatorio")
+    private String email;
+
+    @NotBlank(message = "La contraseña es obligatoria")
+    private String password;
 }

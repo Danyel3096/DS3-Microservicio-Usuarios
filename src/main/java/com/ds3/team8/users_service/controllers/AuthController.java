@@ -1,10 +1,8 @@
 package com.ds3.team8.users_service.controllers;
 
-import com.ds3.team8.users_service.dtos.AuthRequest;
-import com.ds3.team8.users_service.entities.User;
+import com.ds3.team8.users_service.dtos.*;
 import com.ds3.team8.users_service.services.IAuthService;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,18 +19,17 @@ public class AuthController {
 
     private IAuthService authService;
 
-    @Autowired
     public AuthController(IAuthService authService){
         this.authService = authService;
     }
 
     // Registrar usuario
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         Map<String, Object> response = new HashMap<>();
 
         // Crear usuario
-        User newUser = authService.register(user);
+        UserResponse newUser = authService.register(registerRequest);
         response.put("message", "El usuario ha sido creado con éxito!");
         response.put("user", newUser);
 
@@ -41,13 +38,7 @@ public class AuthController {
 
     // Inicio de sesión de usuarios
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-        Map<String, Object> response = new HashMap<>();
-
-        // Generar el token
-        String token = authService.login(request.getEmail(), request.getPassword());
-        response.put("token", token);
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
+        return ResponseEntity.ok(authService.login(authRequest));
     }
 }

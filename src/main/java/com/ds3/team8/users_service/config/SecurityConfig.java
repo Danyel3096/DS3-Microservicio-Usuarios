@@ -1,7 +1,6 @@
 package com.ds3.team8.users_service.config;
 
 import com.ds3.team8.users_service.services.UserDetailsServiceImpl;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

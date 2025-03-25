@@ -2,8 +2,6 @@ package com.ds3.team8.users_service.services;
 
 import com.ds3.team8.users_service.entities.User;
 import com.ds3.team8.users_service.repositories.IUserRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +16,6 @@ import java.util.List;
 public class UserDetailsServiceImpl implements UserDetailsService {
     private IUserRepository userRepository;
 
-    @Autowired
     public UserDetailsServiceImpl(IUserRepository userRepository) {
         this.userRepository = userRepository;
     }

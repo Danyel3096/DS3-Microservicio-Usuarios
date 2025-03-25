@@ -17,9 +17,6 @@ public class JwtUtil {
     private final Long expiration; // Tiempo de expiración
 
     public JwtUtil(@Value("${jwt.secret}") String secret, @Value("${jwt.expiration}") Long expiration) {
-        //OJO BORRAR ESTAS DOS LINEAS
-        System.out.println("JWT Secret: " + secret);
-        System.out.println("JWT Expiration: " + expiration);
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.expiration = expiration;
     }
