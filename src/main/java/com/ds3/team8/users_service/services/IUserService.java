@@ -14,4 +14,6 @@ public interface IUserService {
     UserResponse save(UserRequest userRequest); // Crear un usuario
     UserResponse update(Long id, UserRequest userRequest); // Actualizar/Modificar un usuario
     Page<UserResponse> findAllPageable(Pageable pageable); // Obtener todos los usuarios
+    UserResponse findById(Long id); // Obtener un usuario por su id
+    void delete(Long id); // Eliminar un usuario por su id
 }

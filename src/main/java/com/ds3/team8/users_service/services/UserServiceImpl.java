@@ -6,6 +6,7 @@ import com.ds3.team8.users_service.entities.Role;
 import com.ds3.team8.users_service.entities.User;
 import com.ds3.team8.users_service.exceptions.RoleNotFoundException;
 import com.ds3.team8.users_service.exceptions.UserAlreadyExistsException;
+import com.ds3.team8.users_service.exceptions.UserNotFoundException;
 import com.ds3.team8.users_service.repositories.IRoleRepository;
 import com.ds3.team8.users_service.repositories.IUserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -81,6 +82,27 @@ public class UserServiceImpl implements IUserService {
         return null;
     }
 
+    @Override
+    public UserResponse findById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        return convertToResponse(user);
+    }
+
+    @Override
+    public void delete(Long id){
+        // Buscar el usuario en la base de datos
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        // Cambiar el estado a inactivo
+        existingUser.setIsActive(false);
+
+        // Guardar los cambios en la base de datos
+        userRepository.save(existingUser);
+    }
+
     private UserResponse convertToResponse(User user) {
         return new UserResponse(
                 user.getId(),
@@ -94,3 +116,6 @@ public class UserServiceImpl implements IUserService {
         );
     }
 }
+
+
+

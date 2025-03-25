@@ -72,4 +72,20 @@ public class UserController {
     public Page<UserResponse> findAllPageable(Pageable pageable) {
         return userService.findAllPageable(pageable);
     }
+
+
+    // Obtener un Usuario por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.findById(id));
+    }
+
+    // Eliminación lógica de un usuario
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

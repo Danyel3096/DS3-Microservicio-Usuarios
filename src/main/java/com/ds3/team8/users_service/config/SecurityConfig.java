@@ -1,7 +1,6 @@
 package com.ds3.team8.users_service.config;
 
 import com.ds3.team8.users_service.services.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +23,6 @@ public class SecurityConfig {
     private JwtFilter jwtFilter;
     private UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
     public SecurityConfig(JwtFilter jwtFilter, UserDetailsServiceImpl userDetailsService) {
         this.jwtFilter = jwtFilter;
         this.userDetailsService = userDetailsService;
