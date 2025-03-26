@@ -73,13 +73,40 @@ public class UserServiceImpl implements IUserService {
     // Actualizar/Modificar un usuario
     @Override
     public UserResponse update(Long id, UserRequest userRequest) {
-        return null;
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        // Actualizar los campos solo si no son nulos
+        if (userRequest.getFirstName() != null) user.setFirstName(userRequest.getFirstName());
+        if (userRequest.getLastName() != null) user.setLastName(userRequest.getLastName());
+        if (userRequest.getEmail() != null) user.setEmail(userRequest.getEmail());
+        if (userRequest.getPhone() != null) user.setPhone(userRequest.getPhone());
+        if (userRequest.getAddress() != null) user.setAddress(userRequest.getAddress());
+        //if (userRequest.getIsActive() != null) user.setIsActive(userRequest.getIsActive());
+
+        // Validar y asignar el nuevo rol (si se envió en la petición)
+        if (userRequest.getRoleId() != null) {
+            Role role = roleRepository.findById(userRequest.getRoleId())
+                    .filter(Role::getIsActive)
+                    .orElseThrow(() -> new RoleNotFoundException(userRequest.getRoleId()));
+            user.setRole(role);
+        }
+
+        // Encriptar la nueva contraseña solo si se proporciona
+        if (userRequest.getPassword() != null && !userRequest.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        }
+
+        // Guardar cambios y retornar el DTO
+        User updatedUser = userRepository.save(user);
+        return convertToResponse(updatedUser);
     }
 
     // Buscar usuarios con paginación
     @Override
     public Page<UserResponse> findAllPageable(Pageable pageable) {
-        return null;
+        return userRepository.findAll(pageable)
+                .map(this::convertToResponse);
     }
 
     @Override
