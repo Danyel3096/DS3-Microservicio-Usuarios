@@ -11,6 +11,7 @@ import com.ds3.team8.users_service.repositories.IRoleRepository;
 import com.ds3.team8.users_service.repositories.IUserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -33,6 +34,7 @@ public class UserServiceImpl implements IUserService {
 
     // Obtener todos los usuarios
     @Override
+    @Transactional(readOnly = true)
     public List<UserResponse> findAll() {
         // Obtener todos los usuarios
         return userRepository.findAll()
@@ -43,6 +45,7 @@ public class UserServiceImpl implements IUserService {
 
     // Crear un usuario
     @Override
+    @Transactional
     public UserResponse save(UserRequest userRequest) {
         // Validar si ya existe el correo
         Optional<User> userWithSameEmail = userRepository.findByEmail(userRequest.getEmail());
@@ -72,6 +75,7 @@ public class UserServiceImpl implements IUserService {
 
     // Actualizar/Modificar un usuario
     @Override
+    @Transactional
     public UserResponse update(Long id, UserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
@@ -104,12 +108,14 @@ public class UserServiceImpl implements IUserService {
 
     // Buscar usuarios con paginación
     @Override
+    @Transactional(readOnly = true)
     public Page<UserResponse> findAllPageable(Pageable pageable) {
         return userRepository.findAll(pageable)
                 .map(this::convertToResponse);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponse findById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
@@ -118,6 +124,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id){
         // Buscar el usuario en la base de datos
         User existingUser = userRepository.findById(id)
