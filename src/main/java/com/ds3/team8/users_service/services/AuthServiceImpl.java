@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -44,6 +45,7 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     @Override
+    @Transactional
     public UserResponse register(RegisterRequest registerRequest) {
         // Validar si ya existe el correo
         Optional<User> userWithSameEmail = userRepository.findByEmail(registerRequest.getEmail());
@@ -72,6 +74,7 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AuthResponse login(AuthRequest authRequest) {
         // Verificar si el correo y la contraseña son correctas
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
