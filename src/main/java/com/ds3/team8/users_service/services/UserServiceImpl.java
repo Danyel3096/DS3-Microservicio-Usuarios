@@ -86,7 +86,6 @@ public class UserServiceImpl implements IUserService {
         if (userRequest.getEmail() != null) user.setEmail(userRequest.getEmail());
         if (userRequest.getPhone() != null) user.setPhone(userRequest.getPhone());
         if (userRequest.getAddress() != null) user.setAddress(userRequest.getAddress());
-        //if (userRequest.getIsActive() != null) user.setIsActive(userRequest.getIsActive());
 
         // Validar y asignar el nuevo rol (si se envió en la petición)
         if (userRequest.getRoleId() != null) {
