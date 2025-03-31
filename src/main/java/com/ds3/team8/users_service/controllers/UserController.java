@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController // Indica que esta clase es un controlador REST
 @RequestMapping("/api/v1/users") // Indica la URL base para acceder a los servicios de esta clase
@@ -27,26 +25,14 @@ public class UserController {
     // Obtener todos los usuarios
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<UserResponse> users = userService.findAll();
-
-        // Validar si hay usuarios disponibles
-        if (users.isEmpty()) {
-            throw new RuntimeException("No hay usuarios disponibles");
-        }
-
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.findAll());
     }
 
     // Crear un usuario
     @PostMapping
-    public ResponseEntity<?> saveUser(@Valid @RequestBody UserRequest userRequest) {
-        Map<String, Object> response = new HashMap<>();
-
-        UserResponse newUser = userService.save(userRequest);
-        response.put("message", "El usuario ha sido creado con éxito!");
-        response.put("user", newUser);
-
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public ResponseEntity<UserResponse> saveUser(@Valid @RequestBody UserRequest userRequest) {
+        UserResponse savedUser = userService.save(userRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
 
     // Actualizar un usuario
@@ -54,13 +40,8 @@ public class UserController {
     public ResponseEntity<?> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UserRequest userRequest) {
-        Map<String, Object> response = new HashMap<>();
-
         UserResponse updatedUser = userService.update(id, userRequest);
-        response.put("message", "El usuario ha sido actualizado con éxito!");
-        response.put("user", updatedUser);
-
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.ok(updatedUser);
     }
 
     // Buscar usuarios con paginación
