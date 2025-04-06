@@ -44,7 +44,7 @@ mvn package
 Luego, puedes ejecutar el JAR con:
 
 ```sh
-java -jar target/tu-archivo.jar
+java -jar target/users-service-0.0.1-SNAPSHOT.jar
 ```
 
 ## Documentación de la API
