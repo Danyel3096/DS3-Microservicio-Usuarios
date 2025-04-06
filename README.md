@@ -46,3 +46,9 @@ Luego, puedes ejecutar el JAR con:
 ```sh
 java -jar target/tu-archivo.jar
 ```
+
+## Documentación de la API
+
+La documentación de la API está disponible en Swagger. Una vez que el microservicio esté en ejecución, puedes acceder a ella en la siguiente URL:
+
+[http://localhost:8081/swagger-ui/index.html](http://localhost:8081/swagger-ui/index.html)
