@@ -40,4 +40,12 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false) // Relación 1 a muchos con la tabla roles
     private Role role;
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
 }

@@ -2,6 +2,9 @@ package com.ds3.team8.users_service.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +17,14 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Microservicio de usuarios") // Título de la API
                         .version("1.0.0") // Versión de la API
-                        .description("Documentación de la API del microservicio de usuarios")); // Descripción de la API
+                        .description("Documentación de la API del microservicio de usuarios"))
+                .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
+                .components(new io.swagger.v3.oas.models.Components()
+                        .addSecuritySchemes("Bearer Authentication",
+                                new SecurityScheme()
+                                        .name("Authorization")
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")));
     }
 }

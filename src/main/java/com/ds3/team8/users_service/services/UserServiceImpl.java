@@ -4,9 +4,9 @@ import com.ds3.team8.users_service.dtos.UserRequest;
 import com.ds3.team8.users_service.dtos.UserResponse;
 import com.ds3.team8.users_service.entities.Role;
 import com.ds3.team8.users_service.entities.User;
-import com.ds3.team8.users_service.exceptions.RoleNotFoundException;
-import com.ds3.team8.users_service.exceptions.UserAlreadyExistsException;
-import com.ds3.team8.users_service.exceptions.UserNotFoundException;
+import com.ds3.team8.users_service.exceptions.BadRequestException;
+import com.ds3.team8.users_service.exceptions.NotFoundException;
+import com.ds3.team8.users_service.mappers.UserMapper;
 import com.ds3.team8.users_service.repositories.IRoleRepository;
 import com.ds3.team8.users_service.repositories.IUserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,135 +20,125 @@ import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements IUserService {
-    private IUserRepository userRepository;
+    private final IUserRepository userRepository;
+    private final IRoleRepository roleRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    private IRoleRepository roleRepository;
-
-    private PasswordEncoder passwordEncoder;
-
-    public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, PasswordEncoder passwordEncoder){
+    public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Obtener todos los usuarios
     @Override
     @Transactional(readOnly = true)
     public List<UserResponse> findAll() {
-        // Obtener todos los usuarios
-        return userRepository.findAll()
-                .stream()
-                .map(this::convertToResponse)
-                .toList();
+        // Obtener todos los usuarios activos
+        List<User> users = userRepository.findAllByIsActiveTrue();
+        // Mapear a DTOs
+        return userMapper.toUserResponseList(users);
     }
 
-    // Crear un usuario
     @Override
     @Transactional
     public UserResponse save(UserRequest userRequest) {
-        // Validar si ya existe el correo
-        Optional<User> userWithSameEmail = userRepository.findByEmail(userRequest.getEmail());
-        if (userWithSameEmail.isPresent() && userWithSameEmail.get().getIsActive()) {
-            throw new UserAlreadyExistsException(userRequest.getEmail());
+        // Verificar si el correo ya existe y el usuario está activo
+        Optional<User> existingUser = userRepository.findByEmailAndIsActiveTrue(userRequest.getEmail());
+        if (existingUser.isPresent()) {
+            throw new BadRequestException("Correo ya registrado");
         }
 
-        // Validar que el rol exista y esté activo
-        Role role = roleRepository.findById(userRequest.getRoleId())
-                .filter(Role::getIsActive)
-                .orElseThrow(() -> new RoleNotFoundException(userRequest.getRoleId()));
+        // Verificar si el rol existe
+        Optional<Role> roleOptional = roleRepository.findByIdAndIsActiveTrue(userRequest.getRoleId());
+        if (roleOptional.isEmpty()) {
+            throw new NotFoundException("Rol no encontrado");
+        }
 
-        User user = new User();
-        user.setFirstName(userRequest.getFirstName());
-        user.setLastName(userRequest.getLastName());
-        user.setEmail(userRequest.getEmail());
+        // Crear nuevo usuario
+        User user = userMapper.toUser(userRequest);
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        user.setPhone(userRequest.getPhone());
-        user.setAddress(userRequest.getAddress());
-        user.setIsActive(true); // Asegurar que el usuario esté activo por defecto
-        user.setRole(role);
-
-        // Guardar y devolver DTO
+        user.setRole(roleOptional.get());
+        
+        // Guardar el usuario en la base de datos
         User savedUser = userRepository.save(user);
-        return convertToResponse(savedUser);
+        // Mapear a DTO
+        return userMapper.toUserResponse(savedUser);
     }
 
-    // Actualizar/Modificar un usuario
     @Override
     @Transactional
     public UserResponse update(Long id, UserRequest userRequest) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-
-        // Actualizar los campos solo si no son nulos
-        if (userRequest.getFirstName() != null) user.setFirstName(userRequest.getFirstName());
-        if (userRequest.getLastName() != null) user.setLastName(userRequest.getLastName());
-        if (userRequest.getEmail() != null) user.setEmail(userRequest.getEmail());
-        if (userRequest.getPhone() != null) user.setPhone(userRequest.getPhone());
-        if (userRequest.getAddress() != null) user.setAddress(userRequest.getAddress());
-
-        // Validar y asignar el nuevo rol (si se envió en la petición)
-        if (userRequest.getRoleId() != null) {
-            Role role = roleRepository.findById(userRequest.getRoleId())
-                    .filter(Role::getIsActive)
-                    .orElseThrow(() -> new RoleNotFoundException(userRequest.getRoleId()));
-            user.setRole(role);
+        // Verificar si el usuario existe
+        Optional<User> existingUserOptional = userRepository.findByIdAndIsActiveTrue(id);
+        if (existingUserOptional.isEmpty()) {
+            throw new NotFoundException("Usuario no encontrado");
         }
 
-        // Encriptar la nueva contraseña solo si se proporciona
-        if (userRequest.getPassword() != null && !userRequest.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        User existingUser = existingUserOptional.get();
+
+        // Verificar si el correo ya existe y el usuario está activo
+        Optional<User> existingEmailUser = userRepository.findByEmailAndIsActiveTrue(userRequest.getEmail());
+        if (existingEmailUser.isPresent() && !existingEmailUser.get().getId().equals(existingUser.getId())) {
+            throw new BadRequestException("Correo ya registrado");
         }
 
-        // Guardar cambios y retornar el DTO
-        User updatedUser = userRepository.save(user);
-        return convertToResponse(updatedUser);
+        // Verificar si el rol existe
+        Optional<Role> roleOptional = roleRepository.findByIdAndIsActiveTrue(userRequest.getRoleId());
+        if (roleOptional.isEmpty()) {
+            throw new NotFoundException("Rol no encontrado");
+        }
+
+        // Actualizar los campos del usuario
+        existingUser.setFirstName(userRequest.getFirstName());
+        existingUser.setLastName(userRequest.getLastName());
+        existingUser.setEmail(userRequest.getEmail());
+        existingUser.setPhone(userRequest.getPhone());
+        existingUser.setAddress(userRequest.getAddress());
+        existingUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        existingUser.setRole(roleOptional.get());
+
+        // Guardar el usuario actualizado en la base de datos
+        User updatedUser = userRepository.save(existingUser);
+        // Mapear a DTO
+        return userMapper.toUserResponse(updatedUser);
     }
 
-    // Buscar usuarios con paginación
     @Override
     @Transactional(readOnly = true)
     public Page<UserResponse> findAllPageable(Pageable pageable) {
-        return userRepository.findAll(pageable)
-                .map(this::convertToResponse);
+        // Obtener todos los usuarios activos con paginación
+        Page<User> usersPage = userRepository.findAllByIsActiveTrue(pageable);
+        // Mapear a DTOs
+        return usersPage.map(userMapper::toUserResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserResponse findById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+        // Verificar si el usuario existe
+        Optional<User> userOptional = userRepository.findByIdAndIsActiveTrue(id);
+        if (userOptional.isEmpty()) {
+            throw new NotFoundException("Usuario no encontrado");
+        }
 
-        return convertToResponse(user);
+        // Mapear a DTO
+        return userMapper.toUserResponse(userOptional.get());
     }
 
     @Override
     @Transactional
-    public void delete(Long id){
-        // Buscar el usuario en la base de datos
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+    public void delete(Long id) {
+        // Verificar si el usuario existe
+        Optional<User> userOptional = userRepository.findByIdAndIsActiveTrue(id);
+        if (userOptional.isEmpty()) {
+            throw new NotFoundException("Usuario no encontrado");
+        }
 
-        // Cambiar el estado a inactivo
-        existingUser.setIsActive(false);
-
-        // Guardar los cambios en la base de datos
-        userRepository.save(existingUser);
-    }
-
-    private UserResponse convertToResponse(User user) {
-        return new UserResponse(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getPhone(),
-                user.getAddress(),
-                user.getIsActive(),
-                user.getRole().getId()
-        );
+        // Marcar el usuario como inactivo
+        User user = userOptional.get();
+        user.setIsActive(false);
+        userRepository.save(user);
     }
 }
-
-
-

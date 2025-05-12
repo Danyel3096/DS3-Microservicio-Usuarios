@@ -26,4 +26,12 @@ public class Role {
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Relación 1 a muchos con la tabla usuarios
     private List<User> users;
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
 }

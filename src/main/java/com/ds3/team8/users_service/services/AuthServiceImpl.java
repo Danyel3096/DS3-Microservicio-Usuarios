@@ -3,99 +3,97 @@ package com.ds3.team8.users_service.services;
 import com.ds3.team8.users_service.dtos.*;
 import com.ds3.team8.users_service.entities.Role;
 import com.ds3.team8.users_service.entities.User;
-import com.ds3.team8.users_service.exceptions.RoleNotFoundException;
-import com.ds3.team8.users_service.exceptions.UserAlreadyExistsException;
+import com.ds3.team8.users_service.exceptions.BadRequestException;
+import com.ds3.team8.users_service.exceptions.NotFoundException;
+import com.ds3.team8.users_service.exceptions.UnauthorizedException;
+import com.ds3.team8.users_service.mappers.UserMapper;
 import com.ds3.team8.users_service.repositories.IRoleRepository;
 import com.ds3.team8.users_service.repositories.IUserRepository;
 import com.ds3.team8.users_service.utils.JwtUtil;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 @Service
 public class AuthServiceImpl implements IAuthService {
+    private final IUserRepository userRepository;
+    private final IRoleRepository roleRepository;
+    private final UserMapper userMapper;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
+    private final String DEFAULT_ROLE_NAME = "CLIENT";
 
-    private IUserRepository userRepository;
-
-    private IRoleRepository roleRepository;
-
-    private JwtUtil jwtUtil;
-
-    private AuthenticationManager authenticationManager;
-
-    private UserDetailsService userDetailsService;
-
-    private PasswordEncoder passwordEncoder;
-
-    private final String DEFAULT_ROLE_NAME = "Cliente";
-
-    public AuthServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, JwtUtil jwtUtil, AuthenticationManager authenticationManager, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder){
+    public AuthServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, UserMapper userMapper, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.userMapper = userMapper;
         this.jwtUtil = jwtUtil;
-        this.authenticationManager = authenticationManager;
-        this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    @Transactional
     public UserResponse register(RegisterRequest registerRequest) {
-        // Validar si ya existe el correo
-        Optional<User> userWithSameEmail = userRepository.findByEmail(registerRequest.getEmail());
-        if (userWithSameEmail.isPresent() && userWithSameEmail.get().getIsActive()) {
-            throw new UserAlreadyExistsException(registerRequest.getEmail());
+        // Verificar si el correo ya existe y el usuario está activo
+        Optional<User> existingUser = userRepository.findByEmailAndIsActiveTrue(registerRequest.getEmail());
+        if (existingUser.isPresent()) {
+            throw new BadRequestException("Correo ya registrado");
+        }
+        
+        // Verificar si el rol existe
+        Optional<Role> roleOptional = roleRepository.findByNameAndIsActiveTrue(DEFAULT_ROLE_NAME);
+        if (roleOptional.isEmpty()) {
+            throw new NotFoundException("Rol no encontrado");
         }
 
-        // Validar que el rol exista y esté activo
-        Role role = roleRepository.findByName(DEFAULT_ROLE_NAME)
-                .filter(Role::getIsActive)
-                .orElseThrow(() -> new RoleNotFoundException(DEFAULT_ROLE_NAME));
-
-        User user = new User();
-        user.setFirstName(registerRequest.getFirstName());
-        user.setLastName(registerRequest.getLastName());
-        user.setEmail(registerRequest.getEmail());
+        // Crear el nuevo usuario
+        User user = userMapper.toUser(registerRequest);
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        user.setPhone(registerRequest.getPhone());
-        user.setAddress(registerRequest.getAddress());
-        user.setIsActive(true);
-        user.setRole(role);
+        user.setRole(roleOptional.get());
 
-        // Guardar y devolver DTO
+        // Guardar el usuario en la base de datos
         User savedUser = userRepository.save(user);
-        return convertToResponse(savedUser);
+        return userMapper.toUserResponse(savedUser);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public AuthResponse login(AuthRequest authRequest) {
-        // Verificar si el correo y la contraseña son correctas
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
+        // Verificar si el usuario existe y está activo
+        Optional<User> userOptional = userRepository.findByEmailAndIsActiveTrue(authRequest.getEmail());
+        if (userOptional.isEmpty()) {
+            throw new UnauthorizedException("Correo o contraseña inválidos");
+        }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getEmail());
-        // Generar y devolver el token JWT
-        String token = jwtUtil.generateToken(userDetails.getUsername());
+        User user = userOptional.get();
 
+        // Verificar la contraseña
+        if (!passwordEncoder.matches(authRequest.getPassword(), user.getPassword())) {
+            throw new UnauthorizedException("Correo o contraseña inválidos");
+        }
+
+        // Generar el token JWT
+        String token = jwtUtil.generateToken(user);
         return new AuthResponse(token);
     }
 
-    private UserResponse convertToResponse(User user) {
-        return new UserResponse(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getPhone(),
-                user.getAddress(),
-                user.getIsActive(),
-                user.getRole().getId()
-        );
+    @Override
+    public UserResponse getAuthenticatedUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedException("Usuario no autenticado");
+        }
+
+        // El principal contiene el userId configurado en JwtFilter
+        Long userId = (Long) authentication.getPrincipal();
+
+        // Buscar el usuario en la base de datos
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        // Convertir el usuario a UserResponse y devolverlo
+        return userMapper.toUserResponse(user);
     }
 }

@@ -16,6 +16,5 @@ public class UserResponse {
     private String email;
     private String phone;
     private String address;
-    private Boolean isActive;
-    private Long roleId;
+    private String roleName;
 }
