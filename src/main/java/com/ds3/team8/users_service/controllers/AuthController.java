@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth") // Indica la URL base para acceder a los servicios de esta clase
 public class AuthController {
 
-    private IAuthService authService;
+    private final IAuthService authService;
 
     public AuthController(IAuthService authService){
         this.authService = authService;

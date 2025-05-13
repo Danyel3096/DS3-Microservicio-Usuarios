@@ -18,7 +18,7 @@ import java.util.List;
 @RequestMapping("/api/v1/users") // Indica la URL base para acceder a los servicios de esta clase
 public class UserController {
 
-    private IUserService userService;
+    private final IUserService userService;
 
     public UserController(IUserService userService){
         this.userService = userService;
@@ -26,7 +26,7 @@ public class UserController {
 
     // Obtener todos los usuarios
     @SecurityRequirement(name = "Bearer Authentication")
-    @PreAuthorize("hasAnyRole('ADMIN','CLIENT')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.findAll());
