@@ -1,5 +1,6 @@
 package com.ds3.team8.users_service.dtos;
 
+import com.ds3.team8.users_service.entities.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -38,5 +39,5 @@ public class UserRequest {
     private String address;
 
     @NotNull(message = "El rol es obligatorio")
-    private Long roleId;
+    private Role role;
 }

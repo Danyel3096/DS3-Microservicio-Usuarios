@@ -3,6 +3,7 @@ package com.ds3.team8.users_service.mappers;
 import com.ds3.team8.users_service.dtos.RegisterRequest;
 import com.ds3.team8.users_service.dtos.UserRequest;
 import com.ds3.team8.users_service.dtos.UserResponse;
+import com.ds3.team8.users_service.entities.Role;
 import com.ds3.team8.users_service.entities.User;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,7 @@ public class UserMapper {
                 user.getEmail(),
                 user.getPhone(),
                 user.getAddress(),
-                user.getRole().getName()
+                user.getRole()
         );
     }
 
@@ -33,6 +34,7 @@ public class UserMapper {
         user.setEmail(userRequest.getEmail());
         user.setPhone(userRequest.getPhone());
         user.setAddress(userRequest.getAddress());
+        user.setRole(userRequest.getRole());
         return user;
     }
 
@@ -44,6 +46,7 @@ public class UserMapper {
         user.setEmail(registerRequest.getEmail());
         user.setPhone(registerRequest.getPhone());
         user.setAddress(registerRequest.getAddress());
+        user.setRole(Role.CLIENT);
         return user;
     }
 

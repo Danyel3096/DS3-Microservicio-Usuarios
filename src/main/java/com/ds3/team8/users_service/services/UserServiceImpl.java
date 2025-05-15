@@ -2,12 +2,10 @@ package com.ds3.team8.users_service.services;
 
 import com.ds3.team8.users_service.dtos.UserRequest;
 import com.ds3.team8.users_service.dtos.UserResponse;
-import com.ds3.team8.users_service.entities.Role;
 import com.ds3.team8.users_service.entities.User;
 import com.ds3.team8.users_service.exceptions.BadRequestException;
 import com.ds3.team8.users_service.exceptions.NotFoundException;
 import com.ds3.team8.users_service.mappers.UserMapper;
-import com.ds3.team8.users_service.repositories.IRoleRepository;
 import com.ds3.team8.users_service.repositories.IUserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,13 +19,11 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements IUserService {
     private final IUserRepository userRepository;
-    private final IRoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(IUserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
@@ -49,18 +45,9 @@ public class UserServiceImpl implements IUserService {
         if (existingUser.isPresent()) {
             throw new BadRequestException("Correo ya registrado");
         }
-
-        // Verificar si el rol existe
-        Optional<Role> roleOptional = roleRepository.findByIdAndIsActiveTrue(userRequest.getRoleId());
-        if (roleOptional.isEmpty()) {
-            throw new NotFoundException("Rol no encontrado");
-        }
-
         // Crear nuevo usuario
         User user = userMapper.toUser(userRequest);
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        user.setRole(roleOptional.get());
-        
         // Guardar el usuario en la base de datos
         User savedUser = userRepository.save(user);
         // Mapear a DTO
@@ -84,12 +71,6 @@ public class UserServiceImpl implements IUserService {
             throw new BadRequestException("Correo ya registrado");
         }
 
-        // Verificar si el rol existe
-        Optional<Role> roleOptional = roleRepository.findByIdAndIsActiveTrue(userRequest.getRoleId());
-        if (roleOptional.isEmpty()) {
-            throw new NotFoundException("Rol no encontrado");
-        }
-
         // Actualizar los campos del usuario
         existingUser.setFirstName(userRequest.getFirstName());
         existingUser.setLastName(userRequest.getLastName());
@@ -97,7 +78,7 @@ public class UserServiceImpl implements IUserService {
         existingUser.setPhone(userRequest.getPhone());
         existingUser.setAddress(userRequest.getAddress());
         existingUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        existingUser.setRole(roleOptional.get());
+        existingUser.setRole(userRequest.getRole());
 
         // Guardar el usuario actualizado en la base de datos
         User updatedUser = userRepository.save(existingUser);
@@ -122,7 +103,6 @@ public class UserServiceImpl implements IUserService {
         if (userOptional.isEmpty()) {
             throw new NotFoundException("Usuario no encontrado");
         }
-
         // Mapear a DTO
         return userMapper.toUserResponse(userOptional.get());
     }
@@ -135,7 +115,6 @@ public class UserServiceImpl implements IUserService {
         if (userOptional.isEmpty()) {
             throw new NotFoundException("Usuario no encontrado");
         }
-
         // Marcar el usuario como inactivo
         User user = userOptional.get();
         user.setIsActive(false);

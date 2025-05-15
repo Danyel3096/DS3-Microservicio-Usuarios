@@ -34,12 +34,12 @@ public class User {
     @Column(nullable = false)
     private String address; // Dirección del usuario
 
-    @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role; // Rol del usuario
 
-    @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false) // Relación 1 a muchos con la tabla roles
-    private Role role;
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true; // Estado del usuario
 
     public boolean isActive() {
         return isActive;

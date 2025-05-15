@@ -1,5 +1,6 @@
 package com.ds3.team8.users_service.dtos;
 
+import com.ds3.team8.users_service.entities.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,5 +17,5 @@ public class UserResponse {
     private String email;
     private String phone;
     private String address;
-    private String roleName;
+    private Role role;
 }

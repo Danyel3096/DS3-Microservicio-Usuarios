@@ -41,7 +41,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .claim("user-id", user.getId())
                 .claim("user-email", user.getEmail())
-                .claim("user-role", user.getRole().getName())
+                .claim("user-role", user.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)

@@ -26,11 +26,7 @@ public class UserController {
     // Obtener todos los usuarios
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers(
-            @RequestHeader("X-Authenticated-User-Id") String userId,
-            @RequestHeader("X-Authenticated-User-Role") String role
-    ) {
-        System.out.println("User ID: " + userId + ", Role: " + role);
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.findAll());
     }
 
