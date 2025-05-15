@@ -2,11 +2,9 @@ package com.ds3.team8.users_service.controllers;
 
 import com.ds3.team8.users_service.dtos.*;
 import com.ds3.team8.users_service.services.IAuthService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,12 +31,5 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
         return ResponseEntity.ok(authService.login(authRequest));
-    }
-
-    // Obtener el usuario autenticado
-    @SecurityRequirement(name = "Bearer Authentication")
-    @GetMapping("/me")
-    public ResponseEntity<UserResponse> getAuthenticatedUser() {
-        return ResponseEntity.ok(authService.getAuthenticatedUser());
     }
 }

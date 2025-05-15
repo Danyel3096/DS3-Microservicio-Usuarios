@@ -13,7 +13,6 @@ import com.ds3.team8.users_service.utils.JwtUtil;
 
 import java.util.Optional;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -76,24 +75,5 @@ public class AuthServiceImpl implements IAuthService {
         // Generar el token JWT
         String token = jwtUtil.generateToken(user);
         return new AuthResponse(token);
-    }
-
-    @Override
-    public UserResponse getAuthenticatedUser() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new UnauthorizedException("Usuario no autenticado");
-        }
-
-        // El principal contiene el userId configurado en JwtFilter
-        Long userId = (Long) authentication.getPrincipal();
-
-        // Buscar el usuario en la base de datos
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
-
-        // Convertir el usuario a UserResponse y devolverlo
-        return userMapper.toUserResponse(user);
     }
 }

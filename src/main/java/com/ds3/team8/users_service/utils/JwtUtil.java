@@ -54,26 +54,6 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Extraer userId del token
-    public Long extractUserId(String token) {
-        return extractClaim(token, claims -> ((Number) claims.get("user-id")).longValue());
-    }
-
-    // Extraer role del token
-    public String extractRole(String token) {
-        return extractClaim(token, claims -> claims.get("user-role", String.class));
-    }
-
-    // Extraer email del token
-    public String extractEmail(String token) {
-        return extractClaim(token, claims -> claims.get("user-email", String.class));
-    }
-
-    // Validar si el token es válido
-    public boolean validateToken(String token, String email) {
-        return email.equals(extractEmail(token)) && !isTokenExpired(token);
-    }
-
     // Extraer una propiedad específica del token
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
