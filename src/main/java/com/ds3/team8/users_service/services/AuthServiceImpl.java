@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
@@ -28,6 +29,7 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     @Override
+    @Transactional
     public UserResponse register(RegisterRequest registerRequest) {
         // Verificar si el correo ya existe y el usuario está activo
         Optional<User> existingUser = userRepository.findByEmailAndIsActiveTrue(registerRequest.getEmail());
@@ -45,6 +47,7 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AuthResponse login(AuthRequest authRequest) {
         // Verificar si el usuario existe y está activo
         Optional<User> userOptional = userRepository.findByEmailAndIsActiveTrue(authRequest.getEmail());

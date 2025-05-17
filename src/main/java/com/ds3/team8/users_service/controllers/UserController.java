@@ -49,10 +49,7 @@ public class UserController {
     }
 
     // Buscar usuarios con paginación
-    // Cambia la URL a algo como /api/v1/users/pageable?page=0&size=10&sort=firstName,asc
-    // Para el sort= se puede usar cualquier atributo de la entidad User
-    // Por ejemplo para ordenar por apellido desde la Z a la A sería sort=lastName,desc
-    // Para el caso de roles se puede usar sort=role.name,asc (sort=entity.attribute,asc o desc)
+    // Ejemplo URL /api/v1/users/pageable?page=0&size=8
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/pageable")
     public Page<UserResponse> findAllPageable(Pageable pageable) {
