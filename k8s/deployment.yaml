@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-service
+  template:
+    metadata:
+      labels:
+        app: users-service
+    spec:
+      containers:
+        - name: users-service
+          image: danyel3096/ds3-microservicio-usuarios:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: users-secret
+                  key: DB_HOST
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: users-secret
+                  key: DB_NAME
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: users-secret
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: users-secret
+                  key: DB_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: users-secret
+                  key: JWT_SECRET
