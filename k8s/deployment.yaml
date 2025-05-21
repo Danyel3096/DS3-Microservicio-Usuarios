@@ -18,6 +18,10 @@ spec:
           ports:
             - containerPort: 8081
           env:
+            - name: EUREKA_SERVER_HOST
+              value: "eureka-service"
+            - name: EUREKA_SERVER_PORT
+              value: "8761"
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
