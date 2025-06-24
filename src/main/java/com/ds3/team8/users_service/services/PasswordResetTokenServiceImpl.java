@@ -29,7 +29,7 @@ public class PasswordResetTokenServiceImpl implements IPasswordResetTokenService
     private final JavaMailSender mailSender;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${FRONTEND_RESET_PASSWORD_URL}")
+    @Value("${frontend.reset-password.url}")
     private String resetPasswordUrl;
 
     private static final Logger logger = LoggerFactory.getLogger(PasswordResetTokenServiceImpl.class);
