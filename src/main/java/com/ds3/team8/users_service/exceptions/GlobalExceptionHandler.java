@@ -12,31 +12,55 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException ex) {
+    // Maneja excepciones de recursos no encontrados
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
+        // Se crea un mapa para estructurar la respuesta de error
         Map<String, Object> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-        response.put("status", HttpStatus.NOT_FOUND.value());
+        response.put("error", ex.getMessage()); // Mensaje de error específico
+        response.put("status", HttpStatus.NOT_FOUND.value()); // Código HTTP 404
+
+        // Retorna la respuesta con el estado 404 (Not Found)
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(RoleNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleRoleNotFoundException(RoleNotFoundException ex) {
+    // Maneja excepciones de solicitud incorrecta
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleBadRequestException(BadRequestException ex) {
+        // Se crea un mapa para estructurar la respuesta de error
         Map<String, Object> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-        response.put("status", HttpStatus.NOT_FOUND.value());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
+        response.put("error", ex.getMessage()); // Mensaje de error específico
+        response.put("status", HttpStatus.BAD_REQUEST.value()); // Código HTTP 400
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
+        // Retorna la respuesta con el estado 400 (Bad Request)
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    // Maneja excepciones de acceso no autorizado
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedException(UnauthorizedException ex) {
+        // Se crea un mapa para estructurar la respuesta de error
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", ex.getMessage()); // Mensaje de error específico
+        response.put("status", HttpStatus.UNAUTHORIZED.value()); // Código HTTP 401
+
+        // Retorna la respuesta con el estado 401 (Unauthorized)
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    // Maneja excepciones de acceso prohibido
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDeniedException(AccessDeniedException ex) {
+        // Se crea un mapa para estructurar la respuesta de error
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", ex.getMessage()); // Mensaje de error específico
+        response.put("status", HttpStatus.FORBIDDEN.value()); // Código HTTP 403
+
+        // Retorna la respuesta con el estado 403 (Forbidden)
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+    }
+
+    // Maneja excepciones de validación
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, Object> response = new HashMap<>();
@@ -63,15 +87,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // Maneja errores específicos relacionados con la base de datos (Spring DataAccessException)
+    // Maneja errores específicos relacionados con la base de datos
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<Map<String, Object>> handleDataAccessException(DataAccessException ex) {
         // Se crea un mapa para estructurar la respuesta de error
         Map<String, Object> response = new HashMap<>();
-        response.put("mensaje", "Error al acceder a la base de datos."); // Mensaje genérico
-        // Se concatena el mensaje de error con la causa más específica para más detalles
-        response.put("error", ex.getMessage().concat(": ").concat(ex.getMostSpecificCause().getMessage()));
-
+        response.put("error", "Error de acceso a datos: " + ex.getMessage()); // Mensaje de error con detalles
+        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value()); // Código HTTP 500
         // Retorna la respuesta con el estado 500 (Internal Server Error)
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
