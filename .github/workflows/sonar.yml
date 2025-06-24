@@ -1,5 +1,5 @@
 name: SonarCloud
-
+# Comentario para probar el trigger de SonarCloud
 on:
   push:
     branches:
