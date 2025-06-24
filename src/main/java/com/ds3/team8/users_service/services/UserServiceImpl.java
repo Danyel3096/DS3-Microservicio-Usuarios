@@ -1,14 +1,20 @@
 package com.ds3.team8.users_service.services;
 
+import com.ds3.team8.users_service.client.DeliveryClient;
+import com.ds3.team8.users_service.client.OrderClient;
 import com.ds3.team8.users_service.dtos.UserRequest;
 import com.ds3.team8.users_service.dtos.UserResponse;
 import com.ds3.team8.users_service.entities.User;
 import com.ds3.team8.users_service.enums.Role;
-import com.ds3.team8.users_service.exceptions.RoleNotFoundException;
-import com.ds3.team8.users_service.exceptions.UserAlreadyExistsException;
-import com.ds3.team8.users_service.exceptions.UserNotFoundException;
-import com.ds3.team8.users_service.repositories.IRoleRepository;
+import com.ds3.team8.users_service.exceptions.BadRequestException;
+import com.ds3.team8.users_service.exceptions.NotFoundException;
+import com.ds3.team8.users_service.mappers.UserMapper;
 import com.ds3.team8.users_service.repositories.IUserRepository;
+
+import feign.FeignException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,133 +26,158 @@ import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements IUserService {
-    private IUserRepository userRepository;
+     private final IUserRepository userRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final OrderClient orderClient;
+    private final DeliveryClient deliveryClient;
 
-    private IRoleRepository roleRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    private PasswordEncoder passwordEncoder;
-
-    public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, PasswordEncoder passwordEncoder){
+    public UserServiceImpl(IUserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, 
+                           OrderClient orderClient, DeliveryClient deliveryClient) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
+        this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.orderClient = orderClient;
+        this.deliveryClient = deliveryClient;
     }
 
-    // Obtener todos los usuarios
     @Override
     @Transactional(readOnly = true)
     public List<UserResponse> findAll() {
-        // Obtener todos los usuarios
-        return userRepository.findAll()
-                .stream()
-                .map(this::convertToResponse)
-                .toList();
+        // Obtener todos los usuarios activos
+        List<User> users = userRepository.findAllByIsActiveTrue();
+        if (users.isEmpty()) {
+            logger.warn("No se encontraron usuarios activos");
+            throw new NotFoundException("No se encontraron usuarios activos");
+        }
+        // Mapear a DTOs
+        logger.info("Número de usuarios activos encontrados: {}", users.size());
+        return userMapper.toUserResponseList(users);
     }
 
-    // Crear un usuario
     @Override
     @Transactional
     public UserResponse save(UserRequest userRequest) {
-        // Validar si ya existe el correo
-        Optional<User> userWithSameEmail = userRepository.findByEmail(userRequest.getEmail());
-        if (userWithSameEmail.isPresent() && userWithSameEmail.get().getIsActive()) {
-            throw new UserAlreadyExistsException(userRequest.getEmail());
+        // Verificar si el correo ya existe y el usuario está activo
+        Optional<User> existingUser = userRepository.findByEmailAndIsActiveTrue(userRequest.getEmail());
+        if (existingUser.isPresent()) {
+            logger.warn("Intento de registro con correo ya existente: {}", userRequest.getEmail());
+            throw new BadRequestException("Correo ya registrado");
         }
-
-        // Validar que el rol exista y esté activo
-        Role role = roleRepository.findById(userRequest.getRoleId())
-                .filter(Role::getIsActive)
-                .orElseThrow(() -> new RoleNotFoundException(userRequest.getRoleId()));
-
-        User user = new User();
-        user.setFirstName(userRequest.getFirstName());
-        user.setLastName(userRequest.getLastName());
-        user.setEmail(userRequest.getEmail());
+        // Crear nuevo usuario
+        User user = userMapper.toUser(userRequest);
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        user.setPhone(userRequest.getPhone());
-        user.setAddress(userRequest.getAddress());
-        user.setIsActive(true); // Asegurar que el usuario esté activo por defecto
-        user.setRole(role);
-
-        // Guardar y devolver DTO
+        // Guardar el usuario en la base de datos
         User savedUser = userRepository.save(user);
-        return convertToResponse(savedUser);
+        logger.info("Usuario registrado: {}", savedUser.getEmail());
+        // Mapear a DTO
+        return userMapper.toUserResponse(savedUser);
     }
 
-    // Actualizar/Modificar un usuario
     @Override
     @Transactional
     public UserResponse update(Long id, UserRequest userRequest) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-
-        // Actualizar los campos solo si no son nulos
-        if (userRequest.getFirstName() != null) user.setFirstName(userRequest.getFirstName());
-        if (userRequest.getLastName() != null) user.setLastName(userRequest.getLastName());
-        if (userRequest.getEmail() != null) user.setEmail(userRequest.getEmail());
-        if (userRequest.getPhone() != null) user.setPhone(userRequest.getPhone());
-        if (userRequest.getAddress() != null) user.setAddress(userRequest.getAddress());
-
-        // Validar y asignar el nuevo rol (si se envió en la petición)
-        if (userRequest.getRoleId() != null) {
-            Role role = roleRepository.findById(userRequest.getRoleId())
-                    .filter(Role::getIsActive)
-                    .orElseThrow(() -> new RoleNotFoundException(userRequest.getRoleId()));
-            user.setRole(role);
+        // Verificar si el usuario existe
+        Optional<User> existingUserOptional = userRepository.findByIdAndIsActiveTrue(id);
+        if (existingUserOptional.isEmpty()) {
+            logger.warn("Intento de actualización de usuario con ID no encontrado: {}", id);
+            throw new NotFoundException("Usuario no encontrado");
         }
 
-        // Encriptar la nueva contraseña solo si se proporciona
-        if (userRequest.getPassword() != null && !userRequest.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        User existingUser = existingUserOptional.get();
+        // Verificar si el correo ya existe y el usuario está activo
+        Optional<User> existingEmailUser = userRepository.findByEmailAndIsActiveTrue(userRequest.getEmail());
+        if (existingEmailUser.isPresent() && !existingEmailUser.get().getId().equals(existingUser.getId())) {
+            logger.warn("Intento de actualización con correo ya existente: {}", userRequest.getEmail());
+            throw new BadRequestException("Correo ya registrado");
         }
 
-        // Guardar cambios y retornar el DTO
+        User user = userMapper.updateUser(existingUser, userRequest);
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        // Guardar el usuario actualizado en la base de datos
         User updatedUser = userRepository.save(user);
-        return convertToResponse(updatedUser);
+        logger.info("Usuario actualizado: {}", updatedUser.getEmail());
+        // Mapear a DTO
+        return userMapper.toUserResponse(updatedUser);
     }
 
-    // Buscar usuarios con paginación
     @Override
     @Transactional(readOnly = true)
     public Page<UserResponse> findAllPageable(Pageable pageable) {
-        return userRepository.findAll(pageable)
-                .map(this::convertToResponse);
+        // Obtener todos los usuarios activos con paginación
+        Page<User> usersPage = userRepository.findAllByIsActiveTrue(pageable);
+        if (usersPage.isEmpty()) {
+            logger.warn("No se encontraron usuarios activos en la paginación");
+            throw new NotFoundException("No se encontraron usuarios activos");
+        }
+        // Mapear a DTOs
+        logger.info("Número de usuarios activos encontrados (paginados): {}", usersPage.getTotalElements());
+        return usersPage.map(userMapper::toUserResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserResponse findById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-
-        return convertToResponse(user);
+        // Verificar si el usuario existe
+        Optional<User> userOptional = userRepository.findByIdAndIsActiveTrue(id);
+        if (userOptional.isEmpty()) {
+            logger.warn("Intento de búsqueda de usuario con ID no encontrado: {}", id);
+            throw new NotFoundException("Usuario no encontrado");
+        }
+        // Mapear a DTO
+        logger.info("Usuario encontrado con ID: {}", id);
+        return userMapper.toUserResponse(userOptional.get());
     }
 
     @Override
     @Transactional
-    public void delete(Long id){
-        // Buscar el usuario en la base de datos
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+    public void delete(Long id) {
+        // Verificar si el usuario existe
+        Optional<User> userOptional = userRepository.findByIdAndIsActiveTrue(id);
+        if (userOptional.isEmpty()) {
+            logger.warn("Intento de eliminación de usuario con ID no encontrado: {}", id);
+            throw new NotFoundException("Usuario no encontrado");
+        }
+        User user = userOptional.get();
 
-        // Cambiar el estado a inactivo
-        existingUser.setIsActive(false);
+        // Verificar si el usuario tiene pedidos asociados
+        validateUserHasNoOrders(id);
 
-        // Guardar los cambios en la base de datos
-        userRepository.save(existingUser);
+        // Verificar si el usuario es repartidor y tiene entregas asociadas
+        if(Role.DRIVER.equals(user.getRole())) {
+            validateUserHasNoDeliveries(id);
+        }
+
+        // Marcar el usuario como inactivo
+        user.setIsActive(false);
+        logger.info("Usuario marcado como inactivo: {}", user.getEmail());
+        userRepository.save(user);
     }
 
-    private UserResponse convertToResponse(User user) {
-        return new UserResponse(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getPhone(),
-                user.getAddress(),
-                user.getIsActive(),
-                user.getRole().getId()
-        );
+    private void validateUserHasNoOrders(Long userId) {
+        try {
+            if (orderClient.userHasOrders(userId)) {
+                logger.warn("Intento de eliminación de usuario con pedidos asociados: {}", userId);
+                throw new RuntimeException("No se puede eliminar el usuario porque tiene pedidos asociados");
+            }
+        } catch (FeignException e) {
+            logger.error("Error al verificar los pedidos del usuario con ID {}: {}", userId, e.getMessage());
+            throw new RuntimeException("No se pudo verificar los pedidos del usuario. Intente más tarde.");
+        }
+    }
+
+    private void validateUserHasNoDeliveries(Long userId) {
+        try {
+            if (deliveryClient.userHasDeliveries(userId)) {
+                logger.warn("Intento de eliminación de usuario repartidor con entregas asociadas: {}", userId);
+                throw new RuntimeException("No se puede eliminar el usuario repartidor porque tiene entregas asociadas");
+            }
+        } catch (FeignException e) {
+            logger.error("Error al verificar las entregas del usuario con ID {}: {}", userId, e.getMessage());
+            throw new RuntimeException("No se pudo verificar las entregas del usuario. Intente más tarde.");
+        }
     }
 }
 
