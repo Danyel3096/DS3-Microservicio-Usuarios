@@ -1,5 +1,9 @@
 package com.ds3.team8.users_service.entities;
 
+import java.time.LocalDateTime;
+
+import com.ds3.team8.users_service.enums.Role;
+
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -34,10 +38,38 @@ public class User {
     @Column(nullable = false)
     private String address; // Dirección del usuario
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.CUSTOMER; // Rol del usuario
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
-    @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false) // Relación 1 a muchos con la tabla roles
-    private Role role;
+    @PreUpdate
+    public void setLastUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    public User(String firstName, String lastName, String email, String phone, String address, Role role) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phone = phone;
+        this.address = address;
+        this.role = role;
+    }
 }
