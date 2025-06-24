@@ -9,7 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Objects;
 
 @Configuration
-public class FeignClientInterceptor {
+public class FeignClientInterceptor implements RequestInterceptor {
     
 private static final String USER_ID_HEADER = "X-Authenticated-User-Id";
     private static final String USER_ROLE_HEADER = "X-Authenticated-User-Role";

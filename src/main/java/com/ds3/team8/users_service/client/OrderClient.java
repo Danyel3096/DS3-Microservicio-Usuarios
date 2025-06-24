@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.ds3.team8.users_service.config.FeignClientInterceptor;
 
 @FeignClient(name = "orders-service", configuration = FeignClientInterceptor.class)
-public class OrderClient {
-    
+public interface OrderClient {
+     
     @GetMapping("/api/v1/orders/user/{userId}/exists")
     Boolean userHasOrders(@PathVariable("userId") Long userId);
 
