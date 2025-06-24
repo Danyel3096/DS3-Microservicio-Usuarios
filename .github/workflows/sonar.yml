@@ -45,8 +45,7 @@ jobs:
         run: |
           mvn clean install -DskipTests
           mvn sonar:sonar \
-            -Dsonar.projectKey=sebastian2018-58586 \
+            -Dsonar.projectKey=sebastian2018-58586_DS3-Microservicio-Usuarios \
             -Dsonar.organization=sebastian2018-58586 \
-            -Dsonar.projectName=Sebastian2018-58586_DS3-Microservicio-Usuarios \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=$SONAR_TOKEN
