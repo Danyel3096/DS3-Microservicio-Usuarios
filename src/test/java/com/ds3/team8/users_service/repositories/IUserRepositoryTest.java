@@ -1,7 +1,8 @@
 package com.ds3.team8.users_service.repositories;
 
 import com.ds3.team8.users_service.entities.User;
-import com.ds3.team8.users_service.entities.Role;
+import com.ds3.team8.users_service.enums.Role;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

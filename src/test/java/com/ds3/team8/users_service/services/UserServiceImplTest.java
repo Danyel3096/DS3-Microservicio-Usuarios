@@ -2,8 +2,8 @@ package com.ds3.team8.users_service.services;
 
 import com.ds3.team8.users_service.dtos.UserRequest;
 import com.ds3.team8.users_service.dtos.UserResponse;
-import com.ds3.team8.users_service.entities.Role;
 import com.ds3.team8.users_service.entities.User;
+import com.ds3.team8.users_service.enums.Role;
 import com.ds3.team8.users_service.exceptions.RoleNotFoundException;
 import com.ds3.team8.users_service.exceptions.UserAlreadyExistsException;
 import com.ds3.team8.users_service.exceptions.UserNotFoundException;

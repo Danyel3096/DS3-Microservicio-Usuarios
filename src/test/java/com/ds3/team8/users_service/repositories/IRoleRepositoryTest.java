@@ -1,11 +1,12 @@
 package com.ds3.team8.users_service.repositories;
 
-import com.ds3.team8.users_service.entities.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import com.ds3.team8.users_service.enums.Role;
 
 import java.util.List;
 import java.util.Optional;
