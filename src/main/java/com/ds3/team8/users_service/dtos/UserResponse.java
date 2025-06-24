@@ -1,5 +1,9 @@
 package com.ds3.team8.users_service.dtos;
 
+import java.time.LocalDateTime;
+
+import com.ds3.team8.users_service.enums.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +20,7 @@ public class UserResponse {
     private String email;
     private String phone;
     private String address;
-    private Boolean isActive;
-    private Long roleId;
+    private Role role;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
