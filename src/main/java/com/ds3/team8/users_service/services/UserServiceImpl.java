@@ -7,7 +7,7 @@ import com.ds3.team8.users_service.dtos.UserResponse;
 import com.ds3.team8.users_service.entities.User;
 import com.ds3.team8.users_service.enums.Role;
 import com.ds3.team8.users_service.exceptions.BadRequestException;
-import com.ds3.team8.users_service.exceptions.NotFoundException;
+import com.ds3.team8.users_service.exceptions.NotFoundExceptionTest;
 import com.ds3.team8.users_service.mappers.UserMapper;
 import com.ds3.team8.users_service.repositories.IUserRepository;
 
@@ -50,7 +50,7 @@ public class UserServiceImpl implements IUserService {
         List<User> users = userRepository.findAllByIsActiveTrue();
         if (users.isEmpty()) {
             logger.warn("No se encontraron usuarios activos");
-            throw new NotFoundException("No se encontraron usuarios activos");
+            throw new NotFoundExceptionTest("No se encontraron usuarios activos");
         }
         // Mapear a DTOs
         logger.info("Número de usuarios activos encontrados: {}", users.size());
@@ -83,7 +83,7 @@ public class UserServiceImpl implements IUserService {
         Optional<User> existingUserOptional = userRepository.findByIdAndIsActiveTrue(id);
         if (existingUserOptional.isEmpty()) {
             logger.warn("Intento de actualización de usuario con ID no encontrado: {}", id);
-            throw new NotFoundException("Usuario no encontrado");
+            throw new NotFoundExceptionTest("Usuario no encontrado");
         }
 
         User existingUser = existingUserOptional.get();
@@ -110,7 +110,7 @@ public class UserServiceImpl implements IUserService {
         Page<User> usersPage = userRepository.findAllByIsActiveTrue(pageable);
         if (usersPage.isEmpty()) {
             logger.warn("No se encontraron usuarios activos en la paginación");
-            throw new NotFoundException("No se encontraron usuarios activos");
+            throw new NotFoundExceptionTest("No se encontraron usuarios activos");
         }
         // Mapear a DTOs
         logger.info("Número de usuarios activos encontrados (paginados): {}", usersPage.getTotalElements());
@@ -124,7 +124,7 @@ public class UserServiceImpl implements IUserService {
         Optional<User> userOptional = userRepository.findByIdAndIsActiveTrue(id);
         if (userOptional.isEmpty()) {
             logger.warn("Intento de búsqueda de usuario con ID no encontrado: {}", id);
-            throw new NotFoundException("Usuario no encontrado");
+            throw new NotFoundExceptionTest("Usuario no encontrado");
         }
         // Mapear a DTO
         logger.info("Usuario encontrado con ID: {}", id);
@@ -138,7 +138,7 @@ public class UserServiceImpl implements IUserService {
         Optional<User> userOptional = userRepository.findByIdAndIsActiveTrue(id);
         if (userOptional.isEmpty()) {
             logger.warn("Intento de eliminación de usuario con ID no encontrado: {}", id);
-            throw new NotFoundException("Usuario no encontrado");
+            throw new NotFoundExceptionTest("Usuario no encontrado");
         }
         User user = userOptional.get();
 
