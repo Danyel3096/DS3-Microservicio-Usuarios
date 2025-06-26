@@ -30,7 +30,7 @@ public class PasswordResetTokenServiceImpl implements IPasswordResetTokenService
     private final PasswordEncoder passwordEncoder;
 
     @Value("${frontend.reset-password.url}")
-    private String resetPasswordUrl;
+    public String resetPasswordUrl;
 
     private static final Logger logger = LoggerFactory.getLogger(PasswordResetTokenServiceImpl.class);
 
