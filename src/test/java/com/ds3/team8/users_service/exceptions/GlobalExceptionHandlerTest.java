@@ -95,4 +95,40 @@ class GlobalExceptionHandlerTest {
         assertEquals("El correo es inválido", errors.get("email"));
         assertEquals("La contraseña es obligatoria", errors.get("password"));
     }
+
+    @Test
+    void handleUserHasOrdersException_shouldReturn409() {
+        UserHasOrdersException ex = new UserHasOrdersException("Usuario tiene pedidos asociados");
+        ResponseEntity<Map<String, Object>> response = handler.handleUserHasOrdersException(ex);
+
+        assertEquals(409, response.getStatusCode().value());
+        assertEquals("Usuario tiene pedidos asociados", response.getBody().get("error"));
+    }
+
+    @Test
+    void handleOrderVerificationException_shouldReturn503() {
+        OrderVerificationException ex = new OrderVerificationException("Error al verificar pedidos");
+        ResponseEntity<Map<String, Object>> response = handler.handleOrderVerificationException(ex);
+
+        assertEquals(503, response.getStatusCode().value());
+        assertEquals("Error al verificar pedidos", response.getBody().get("error"));
+    }
+
+    @Test
+    void handleUserHasDeliveriesException_shouldReturn409() {
+        UserHasDeliveriesException ex = new UserHasDeliveriesException("Error al verificar entregas");
+        ResponseEntity<Map<String, Object>> response = handler.handleUserHasDeliveriesException(ex);
+
+        assertEquals(409, response.getStatusCode().value());
+        assertEquals("Error al verificar entregas", response.getBody().get("error"));
+    }
+
+    @Test
+    void handleDeliveryVerificationException_shouldReturn503() {
+        DeliveryVerificationException ex = new DeliveryVerificationException("Error al verificar entregas");
+        ResponseEntity<Map<String, Object>> response = handler.handleDeliveryVerificationException(ex);
+
+        assertEquals(503, response.getStatusCode().value());
+        assertEquals("Error al verificar entregas", response.getBody().get("error"));
+    }
 }
