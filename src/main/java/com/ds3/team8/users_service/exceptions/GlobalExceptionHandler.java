@@ -13,8 +13,8 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     // Maneja excepciones de recursos no encontrados
-    @ExceptionHandler(NotFoundExceptionTest.class)
-    public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundExceptionTest ex) {
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
         // Se crea un mapa para estructurar la respuesta de error
         Map<String, Object> response = new HashMap<>();
         response.put("error", ex.getMessage()); // Mensaje de error específico
