@@ -61,6 +61,6 @@ public class UserMapper {
 
         return users.stream()
                 .map(this::toUserResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

@@ -11,7 +11,7 @@ import com.ds3.team8.users_service.enums.Role;
 import java.util.List;
 import java.time.LocalDateTime;
 
-public class UserMapperTest {
+class UserMapperTest {
     private final UserMapper mapper = new UserMapper();
 
     @Test

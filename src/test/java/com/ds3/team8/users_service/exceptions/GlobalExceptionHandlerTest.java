@@ -29,7 +29,7 @@ class GlobalExceptionHandlerTest {
         NotFoundException ex = new NotFoundException("No encontrado");
         ResponseEntity<Map<String, Object>> response = handler.handleNotFoundException(ex);
 
-        assertEquals(404, response.getStatusCodeValue());
+        assertEquals(404, response.getStatusCode().value());
         assertEquals("No encontrado", response.getBody().get("error"));
     }
 
@@ -38,7 +38,7 @@ class GlobalExceptionHandlerTest {
         BadRequestException ex = new BadRequestException("Solicitud inválida");
         ResponseEntity<Map<String, Object>> response = handler.handleBadRequestException(ex);
 
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertEquals("Solicitud inválida", response.getBody().get("error"));
     }
 
@@ -47,7 +47,7 @@ class GlobalExceptionHandlerTest {
         UnauthorizedException ex = new UnauthorizedException("No autorizado");
         ResponseEntity<Map<String, Object>> response = handler.handleUnauthorizedException(ex);
 
-        assertEquals(401, response.getStatusCodeValue());
+        assertEquals(401, response.getStatusCode().value());
         assertEquals("No autorizado", response.getBody().get("error"));
     }
 
@@ -56,7 +56,7 @@ class GlobalExceptionHandlerTest {
         AccessDeniedException ex = new AccessDeniedException("Acceso denegado");
         ResponseEntity<Map<String, Object>> response = handler.handleAccessDeniedException(ex);
 
-        assertEquals(403, response.getStatusCodeValue());
+        assertEquals(403, response.getStatusCode().value());
         assertEquals("Acceso denegado", response.getBody().get("error"));
     }
 
@@ -65,7 +65,7 @@ class GlobalExceptionHandlerTest {
         Exception ex = new RuntimeException("Error interno");
         ResponseEntity<Map<String, Object>> response = handler.handleGeneralException(ex);
 
-        assertEquals(500, response.getStatusCodeValue());
+        assertEquals(500, response.getStatusCode().value());
         assertTrue(response.getBody().get("error").toString().contains("Error inesperado"));
     }
 
@@ -74,7 +74,7 @@ class GlobalExceptionHandlerTest {
         DataAccessException ex = new DataIntegrityViolationException("Violación de integridad");
         ResponseEntity<Map<String, Object>> response = handler.handleDataAccessException(ex);
 
-        assertEquals(500, response.getStatusCodeValue());
+        assertEquals(500, response.getStatusCode().value());
         assertTrue(response.getBody().get("error").toString().contains("Error de acceso a datos"));
     }
 
@@ -90,7 +90,7 @@ class GlobalExceptionHandlerTest {
         MethodArgumentNotValidException ex = new MethodArgumentNotValidException(null, bindingResult);
         ResponseEntity<Map<String, Object>> response = handler.handleValidationExceptions(ex);
 
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         Map<String, String> errors = (Map<String, String>) response.getBody().get("errors");
         assertEquals("El correo es inválido", errors.get("email"));
         assertEquals("La contraseña es obligatoria", errors.get("password"));

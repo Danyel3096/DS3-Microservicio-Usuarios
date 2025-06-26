@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.ds3.team8.users_service.exceptions.UnauthorizedException;
 import com.ds3.team8.users_service.enums.Role;
 
-public class SecurityUtilTest {
+class SecurityUtilTest {
     // -------- validateRole --------
 
     @Test

@@ -19,7 +19,7 @@ import com.ds3.team8.users_service.enums.Role;
 import java.util.Base64;
 import java.util.Date;
 
-public class JwtUtilTest {
+class JwtUtilTest {
     private JwtUtil jwtUtil;
     private final String rawSecret = "SuperSecretKeyForJWTShouldBeAtLeast32CharactersLong123!";
     private final User mockUser = new User("Diego", "Tolosa", "diego@example.com", "+573001112233", "Calle 123", Role.CUSTOMER);

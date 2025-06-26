@@ -158,7 +158,7 @@ public class UserServiceImpl implements IUserService {
 
     private void validateUserHasNoOrders(Long userId) {
         try {
-            if (orderClient.userHasOrders(userId)) {
+            if (Boolean.TRUE.equals(orderClient.userHasOrders(userId))) {
                 logger.warn("Intento de eliminación de usuario con pedidos asociados: {}", userId);
                 throw new RuntimeException("No se puede eliminar el usuario porque tiene pedidos asociados");
             }
@@ -170,7 +170,7 @@ public class UserServiceImpl implements IUserService {
 
     private void validateUserHasNoDeliveries(Long userId) {
         try {
-            if (deliveryClient.userHasDeliveries(userId)) {
+            if (Boolean.TRUE.equals(deliveryClient.userHasDeliveries(userId))) {
                 logger.warn("Intento de eliminación de usuario repartidor con entregas asociadas: {}", userId);
                 throw new RuntimeException("No se puede eliminar el usuario repartidor porque tiene entregas asociadas");
             }

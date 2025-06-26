@@ -24,7 +24,7 @@ import java.util.List;
 
 
 
-public class UserControllerTest {
+class UserControllerTest {
     private IUserService userService;
     private UserController userController;
 

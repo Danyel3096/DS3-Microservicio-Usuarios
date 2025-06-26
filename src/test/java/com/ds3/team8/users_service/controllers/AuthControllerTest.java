@@ -19,7 +19,7 @@ import com.ds3.team8.users_service.services.IAuthService;
 import com.ds3.team8.users_service.services.IPasswordResetTokenService;
 import com.ds3.team8.users_service.enums.Role;
 
-public class AuthControllerTest {
+class AuthControllerTest {
     private IAuthService authService;
     private IPasswordResetTokenService passwordResetTokenService;
     private AuthController authController;
@@ -49,7 +49,7 @@ public class AuthControllerTest {
 
         ResponseEntity<UserResponse> result = authController.register(request);
 
-        assertEquals(201, result.getStatusCodeValue());
+        assertEquals(201, result.getStatusCode().value());
         assertEquals(response, result.getBody());
     }
 
@@ -62,7 +62,7 @@ public class AuthControllerTest {
 
         ResponseEntity<AuthResponse> result = authController.login(request);
 
-        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(200, result.getStatusCode().value());
         assertEquals("fake-jwt-token", result.getBody().getToken());
     }
 
@@ -74,7 +74,7 @@ public class AuthControllerTest {
 
         ResponseEntity<String> result = authController.sendPasswordResetEmail(request);
 
-        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(200, result.getStatusCode().value());
         assertEquals("Correo de restablecimiento de contraseña enviado.", result.getBody());
     }
 
@@ -86,7 +86,7 @@ public class AuthControllerTest {
 
         ResponseEntity<String> result = authController.resetPassword(request);
 
-        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(200, result.getStatusCode().value());
         assertEquals("Contraseña restablecida correctamente.", result.getBody());
     }
 
@@ -94,7 +94,7 @@ public class AuthControllerTest {
     void showResetPasswordMessage_shouldReturnMessage() {
         ResponseEntity<String> result = authController.showResetPasswordMessage();
 
-        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(200, result.getStatusCode().value());
         assertEquals("Restablecer la contraseña del usuario.", result.getBody());
     }
 }

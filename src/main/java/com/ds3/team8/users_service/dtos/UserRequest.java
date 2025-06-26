@@ -31,21 +31,21 @@ public class UserRequest {
 
     @NotBlank(message = "El campo 'password' es obligatorio")
     @Pattern(
-            regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=]).{8,}$",
+            regexp = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[@#$%^&+=]).{8,}$",
             message = "El campo 'password' debe tener al menos 8 caracteres, incluyendo al menos un número, una letra y un carácter especial"
     )
     private String password;
 
     @NotBlank(message = "El campo 'confirmPassword' es obligatorio")
     @Pattern(
-            regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=]).{8,}$",
+            regexp = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[@#$%^&+=]).{8,}$",
             message = "El campo 'confirmPassword' debe tener al menos 8 caracteres, incluyendo al menos un número, una letra y un carácter especial"
     )
     private String confirmPassword;
 
     @NotBlank(message = "El campo 'phone' es obligatorio")
     @Pattern(
-            regexp = "^\\+?[0-9]{10,15}$",
+            regexp = "^\\+?\\d{10,15}$",
             message = "El campo 'phone' debe ser un número de teléfono válido, con un máximo de 15 dígitos y opcionalmente comenzando con '+'"
     )
     private String phone;

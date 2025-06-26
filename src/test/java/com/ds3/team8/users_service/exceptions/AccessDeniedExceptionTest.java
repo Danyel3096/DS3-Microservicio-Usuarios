@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class AccessDeniedExceptionTest {
+class AccessDeniedExceptionTest {
     @Test
     void testMessageConstructor() {
         String message = "Acceso denegado";

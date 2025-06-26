@@ -28,7 +28,7 @@ import com.ds3.team8.users_service.utils.JwtUtil;
 import com.ds3.team8.users_service.entities.User;
 
 @ExtendWith(MockitoExtension.class)
-public class AuthServiceImplTest {
+class AuthServiceImplTest {
     @Mock
     private IUserRepository userRepository;
 

@@ -19,14 +19,14 @@ public class PasswordResetRequest {
 
       @NotBlank(message = "El campo 'newPassword' es obligatorio")
       @Pattern(
-            regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=]).{8,}$",
+            regexp = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[@#$%^&+=]).{8,}$",
             message = "El campo 'password' debe tener al menos 8 caracteres, incluyendo al menos un número, una letra y un carácter especial"
       )
       private String newPassword;
 
       @NotBlank(message = "El campo 'confirmPassword' es obligatorio")
       @Pattern(
-            regexp = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[@#$%^&+=]).{8,}$",
+            regexp = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[@#$%^&+=]).{8,}$",
             message = "El campo 'confirmPassword' debe tener al menos 8 caracteres, incluyendo al menos un número, una letra y un carácter especial"
       )
       private String confirmPassword;
