@@ -7,7 +7,11 @@ import com.ds3.team8.users_service.dtos.UserResponse;
 import com.ds3.team8.users_service.entities.User;
 import com.ds3.team8.users_service.enums.Role;
 import com.ds3.team8.users_service.exceptions.BadRequestException;
+import com.ds3.team8.users_service.exceptions.DeliveryVerificationException;
 import com.ds3.team8.users_service.exceptions.NotFoundException;
+import com.ds3.team8.users_service.exceptions.OrderVerificationException;
+import com.ds3.team8.users_service.exceptions.UserHasDeliveriesException;
+import com.ds3.team8.users_service.exceptions.UserHasOrdersException;
 import com.ds3.team8.users_service.mappers.UserMapper;
 import com.ds3.team8.users_service.repositories.IUserRepository;
 
@@ -160,11 +164,11 @@ public class UserServiceImpl implements IUserService {
         try {
             if (Boolean.TRUE.equals(orderClient.userHasOrders(userId))) {
                 logger.warn("Intento de eliminación de usuario con pedidos asociados: {}", userId);
-                throw new RuntimeException("No se puede eliminar el usuario porque tiene pedidos asociados");
+                throw new UserHasOrdersException("No se puede eliminar el usuario porque tiene pedidos asociados");
             }
         } catch (FeignException e) {
             logger.error("Error al verificar los pedidos del usuario con ID {}: {}", userId, e.getMessage());
-            throw new RuntimeException("No se pudo verificar los pedidos del usuario. Intente más tarde.");
+            throw new OrderVerificationException("No se pudo verificar los pedidos del usuario. Intente más tarde.");
         }
     }
 
@@ -172,11 +176,11 @@ public class UserServiceImpl implements IUserService {
         try {
             if (Boolean.TRUE.equals(deliveryClient.userHasDeliveries(userId))) {
                 logger.warn("Intento de eliminación de usuario repartidor con entregas asociadas: {}", userId);
-                throw new RuntimeException("No se puede eliminar el usuario repartidor porque tiene entregas asociadas");
+                throw new UserHasDeliveriesException("No se puede eliminar el usuario repartidor porque tiene entregas asociadas");
             }
         } catch (FeignException e) {
             logger.error("Error al verificar las entregas del usuario con ID {}: {}", userId, e.getMessage());
-            throw new RuntimeException("No se pudo verificar las entregas del usuario. Intente más tarde.");
+            throw new DeliveryVerificationException("No se pudo verificar las entregas del usuario. Intente más tarde.");
         }
     }
 }
